@@ -1,0 +1,30 @@
+# Controle de versão
+.git/
+.gitignore
+
+# Ambiente virtual
+.venv/
+venv/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+
+# Segredos
+.env
+.env.*
+
+# Editor
+.vscode/
+.idea/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Testes e documentação
+.pytest_cache/
+.coverage
+htmlcov/
+README.md
