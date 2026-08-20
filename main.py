@@ -3,11 +3,13 @@ from fastapi.security import HTTPBasicCredentials
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import selectinload
 from contextlib import asynccontextmanager
 from database import init_db, get_db
 from auth import user_authenticate
 from models import Genre, Movie
 from schemas import SchemaGenre, SchemaGenreResponse, SchemaMovie, SchemaMovieResponse, SchemaMovieUpdate
+from cache import redis_movies_save, redis_movies_get, redis_movies_delete
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -76,4 +78,23 @@ async def create_movies(movie: SchemaMovie, credentials: HTTPBasicCredentials = 
         await db.rollback()
         raise HTTPException(status_code=409, detail="This movie has already existed in database. Please, try again!")
     
+    await redis_movies_delete()
+    
     return new_movie
+
+@app.get("/movies", status_code=200, response_model=list[SchemaMovieResponse])
+async def read_movies_get(credentials: HTTPBasicCredentials = Depends(user_authenticate), db: AsyncSession = Depends(get_db)):
+    
+    data_redis = await redis_movies_get()
+    
+    if data_redis is not None:
+        return data_redis
+    
+    movies = await db.execute(select(Movie).options(selectinload(Movie.genres)))
+    movies_result = movies.scalars().all()
+    
+    movies_schemas_list = [SchemaMovieResponse.model_validate(movie) for movie in movies_result]
+    
+    await redis_movies_save(movies_schemas_list)
+    
+    return movies_result

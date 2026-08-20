@@ -32,7 +32,7 @@ class SchemaMovieResponse(SchemaMovie):
     @field_validator("genres", mode="before")
     @classmethod
     def genres_to_name(cls, value):
-        result = [genre.name for genre in value]
+        result = [genre if isinstance(genre, str) else genre.name for genre in value]
         return result
 
 class SchemaMovieUpdate(BaseModel):
