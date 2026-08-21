@@ -7,11 +7,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from auth import user_authenticate
-from cache import cache_save, cache_get, cache_delete
-from database import get_db, init_db
-from models import Genre, Movie
-from schemas import (
+from app.auth import user_authenticate
+from app.cache import cache_save, cache_get, cache_delete
+from app.database import get_db, init_db
+from app.models import Genre, Movie
+from app.schemas import (
     SchemaGenre,
     SchemaGenreResponse,
     SchemaMovie,

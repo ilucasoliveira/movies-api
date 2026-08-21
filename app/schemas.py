@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from datetime import date
-from models import MovieStatus
+from app.models import MovieStatus
 
 class SchemaGenre(BaseModel):
     model_config = ConfigDict(from_attributes=True)
