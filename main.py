@@ -31,7 +31,7 @@ app = FastAPI(
     version="1.0.0",
     contact={
         "name":"Lucas de Oliveira",
-        "email":"lucasdeoliveira@gmail.com"
+        "email":"lucasdeoliveira937@gmail.com"
         }
 )
 
@@ -165,3 +165,17 @@ async def update_movie(id: int, update_movie: SchemaMovieUpdate, credentials: HT
         raise HTTPException(status_code=409, detail="This movie has already existed in database. Please, try again!")
     
     return result_movie
+
+@app.delete("/movies/{id}", status_code=204)
+async def delete_movie(id: int, credentials: HTTPBasicCredentials = Depends(user_authenticate), db: AsyncSession = Depends(get_db)):
+    
+    movie = await db.execute(select(Movie).filter(Movie.id == id).options(selectinload(Movie.genres)))
+    result_movie = movie.scalars().first()
+    
+    if not result_movie:
+        raise HTTPException(status_code=404, detail="Movie or tv show not found.")
+    
+    await db.delete(result_movie)
+    await db.commit()
+    await cache_delete("movies")
+    await cache_delete(movie_key(id))
